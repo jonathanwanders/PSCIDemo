@@ -30,7 +30,7 @@ jobs:
         dotnet-version: ${{ env.DOT_NET_VERSION }}
         
     - name: Print build config
-      run: echo "Build Config - $BUILD_CONFIG
+      run: echo "Build Config - $BUILD_CONFIG"
       
     - name: Print Default Environment variable of person or app that initiated workflow
       run: echo "Workflow initiated by - $GITHUB_ACTOR"
