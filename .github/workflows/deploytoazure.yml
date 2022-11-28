@@ -27,7 +27,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ env.BUILD_CONFIG }}
+        dotnet-version: ${{ env.DOT_NET_VERSION }}
         
     - name: Print build config
       run: echo "Build Config - $BUILD_CONFIG
