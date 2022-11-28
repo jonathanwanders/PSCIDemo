@@ -1,0 +1,1224 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_PSDeployDemoJW_name": {
+            "defaultValue": "PSDeployDemoJW",
+            "type": "String"
+        },
+        "serverfarms_PSDeployASP_name": {
+            "defaultValue": "PSDeployASP",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-03-01",
+            "name": "[parameters('serverfarms_PSDeployASP_name')]",
+            "location": "West Europe",
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S",
+                "capacity": 1
+            },
+            "kind": "app",
+            "properties": {
+                "perSiteScaling": false,
+                "elasticScaleEnabled": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0,
+                "zoneRedundant": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2022-03-01",
+            "name": "[parameters('sites_PSDeployDemoJW_name')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_PSDeployASP_name'))]"
+            ],
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "psdeploydemojw.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "psdeploydemojw.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_PSDeployASP_name'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "customDomainVerificationId": "ABCFE3BD786AC5102F2D77247C69BB39DA9B353BB05508D63B8EC588DD8EB61D",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/ftp')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/scm')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/web')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v6.0",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$PSDeployDemoJW",
+                "scmType": "GitHubAction",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/', parameters('sites_PSDeployDemoJW_name'), '.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "siteName": "PSDeployDemoJW",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T13_55_27_4323092')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T14_55_27_3960173')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T15_55_27_4211564')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T16_55_27_4800227')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T17_55_27_5789020')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T18_55_28_1281094')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T19_55_27_6553959')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T20_55_27_7465090')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T21_55_27_8511859')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T22_55_27_8442335')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-26T23_55_27_9281857')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T00_55_28_0309074')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T01_55_28_0279963')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T02_55_28_0871956')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T03_55_28_2196086')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T04_55_28_2621977')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T05_55_28_2839178')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T06_55_28_3839279')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T07_55_28_4440281')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T08_55_28_4835977')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T09_55_28_5623486')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T10_55_28_6512425')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T11_55_28_6680396')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T12_55_28_7475656')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T13_55_28_8101533')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T14_55_28_8644516')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T15_55_28_9334060')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T16_55_29_0512202')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T17_55_29_0631877')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T18_55_29_1390318')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T19_55_29_1973859')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T20_55_29_2464830')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T21_55_29_3527837')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T22_55_29_4235804')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-27T23_55_29_4319840')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T00_55_29_5002305')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T01_55_29_5603397')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T02_55_29_6635207')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T03_55_29_6791357')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T04_55_29_7684741')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T05_55_29_7997481')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T06_55_29_9080421')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T07_55_29_9348487')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T08_55_30_0347607')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T09_55_30_0772789')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T10_55_30_2283348')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/2022-11-28T11_55_30_1870316')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]",
+                "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_PSDeployASP_name'))]"
+            ],
+            "kind": "app",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "psdeploydemojw-development.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "psdeploydemojw-development.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('serverfarms_PSDeployASP_name'))]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "vnetRouteAllEnabled": false,
+                "vnetImagePullEnabled": false,
+                "vnetContentShareEnabled": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "customDomainVerificationId": "ABCFE3BD786AC5102F2D77247C69BB39DA9B353BB05508D63B8EC588DD8EB61D",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/basicPublishingCredentialsPolicies",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/ftp')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/basicPublishingCredentialsPolicies",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/scm')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/config",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/web')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v6.0",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$psdeploydemojw__development",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 2147483647,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.2",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/07df5ac2681d4c00afb1c2daeaba8a38')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "GITHUB_ZIP_DEPLOY",
+                "message": "{\"type\":\"deployment\",\"sha\":\"a2c405552e49c339ce7e179a6f70f770d7cef999\",\"repoName\":\"jonathanwanders/PSCIDemo\",\"slotName\":\"Production\",\"commitMessage\":\"Add or update the Azure App Service build and deployment workflow config\"}",
+                "start_time": "2022-11-26T15:33:57.7489042Z",
+                "end_time": "2022-11-26T15:34:04.1524807Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/3ce2e7d5816940c08c99e8c59c69fd3e')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "GITHUB_ZIP_DEPLOY",
+                "message": "{\"type\":\"deployment\",\"sha\":\"0da18e16ee03a19865af378d4f85fed9ff919a2a\",\"repoName\":\"jonathanwanders/PSCIDemo\",\"slotName\":\"development\",\"commitMessage\":\"Update dotnet.yml\"}",
+                "start_time": "2022-11-28T07:34:12.1413809Z",
+                "end_time": "2022-11-28T07:34:22.7051565Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/deployments",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/5f919859dee040939caa3968f60b242d')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "GITHUB_ZIP_DEPLOY",
+                "message": "{\"type\":\"deployment\",\"sha\":\"0256d20e670b5c855fc3ba6dae5f25934c428489\",\"repoName\":\"jonathanwanders/PSCIDemo\",\"slotName\":\"development\",\"commitMessage\":\"Update deploytoazure.yml\"}",
+                "start_time": "2022-11-28T07:06:25.3007284Z",
+                "end_time": "2022-11-28T07:06:35.0339444Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/hostNameBindings",
+            "apiVersion": "2022-03-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/', parameters('sites_PSDeployDemoJW_name'), '-development.azurewebsites.net')]",
+            "location": "West Europe",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ],
+            "properties": {
+                "siteName": "psdeploydemojw(development)",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T15_55_27_4211564')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T16_55_27_4800227')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T17_55_27_5789020')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T18_55_28_1281094')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T19_55_27_6553959')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T20_55_27_7465090')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T21_55_27_8511859')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T22_55_27_8442335')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-26T23_55_27_9281857')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T00_55_28_0309074')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T01_55_28_0279963')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T02_55_28_0871956')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T03_55_28_2196086')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T04_55_28_2621977')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T05_55_28_2839178')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T06_55_28_3839279')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T07_55_28_4440281')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T08_55_28_4835977')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T09_55_28_5623486')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T10_55_28_6512425')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T11_55_28_6680396')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T12_55_28_7475656')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T13_55_28_8101533')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T14_55_28_8644516')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T15_55_28_9334060')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T16_55_29_0512202')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T17_55_29_0631877')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T18_55_29_1390318')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T19_55_29_1973859')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T20_55_29_2464830')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T21_55_29_3527837')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T22_55_29_4235804')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-27T23_55_29_4319840')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T00_55_29_5002305')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T01_55_29_5603397')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T02_55_29_6635207')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T03_55_29_6791357')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T04_55_29_7684741')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T05_55_29_7997481')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T06_55_29_9080421')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T07_55_29_9348487')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T08_55_30_0347607')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T09_55_30_0772789')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T10_55_30_2283348')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Web/sites/slots/snapshots",
+            "apiVersion": "2015-08-01",
+            "name": "[concat(parameters('sites_PSDeployDemoJW_name'), '/development/2022-11-28T11_55_30_1870316')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/slots', parameters('sites_PSDeployDemoJW_name'), 'development')]",
+                "[resourceId('Microsoft.Web/sites', parameters('sites_PSDeployDemoJW_name'))]"
+            ]
+        }
+    ]
+}
